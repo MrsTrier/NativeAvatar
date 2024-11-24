@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  NativeAvatarViewController.swift
 //  NativeAvatar
 //
 //  Created by Daria Cheremina on 22/11/2024.
@@ -15,7 +15,7 @@ private struct Const {
 
 class NativeAvatarViewController: UIViewController, UIScrollViewDelegate {
 
-    let imageView = UIImageView(image: UIImage(systemName: "person.crop.circle.fill"))
+    private let imageView = UIImageView(image: UIImage(systemName: "person.crop.circle.fill")?.withTintColor(.systemGray2, renderingMode: .alwaysOriginal))
     lazy var navBar = self.navigationController?.navigationBar
 
     let scrollView: UIScrollView = {
@@ -26,11 +26,11 @@ class NativeAvatarViewController: UIViewController, UIScrollViewDelegate {
         return scrollView
     }()
 
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         title = "Avatar"
-        setupNavigationBarAppearance()
         setUpScrollView()
     }
 
@@ -46,21 +46,30 @@ class NativeAvatarViewController: UIViewController, UIScrollViewDelegate {
         ])
     }
 
+  override func viewDidLayoutSubviews() {
+        setupNavigationBarAppearance()
+  }
+
+
     private func setupNavigationBarAppearance() {
-        guard let navBar else { return }
+      guard let navigationBar = navigationController?.navigationBar,
+                let UINavigationBarLargeTitleView = NSClassFromString("_UINavigationBarLargeTitleView") else { return }
 
-        navBar.addSubview(imageView)
-        navBar.sendSubviewToBack(imageView)
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            imageView.rightAnchor.constraint(equalTo: navBar.rightAnchor,
-                                             constant: -Const.ImageRightMargin),
-            imageView.bottomAnchor.constraint(equalTo: navBar.bottomAnchor,
-                                              constant: -Const.ImageBottomMarginForLargeState),
-            imageView.heightAnchor.constraint(equalToConstant: Const.ImageSizeForLargeState),
-            imageView.widthAnchor.constraint(equalTo: imageView.heightAnchor)
-            ])
+          navigationBar.subviews.forEach { subview in
+              if subview.isKind(of: UINavigationBarLargeTitleView.self) {
+                  if imageView.superview == nil {
+                      imageView.translatesAutoresizingMaskIntoConstraints = false
+                      subview.addSubview(imageView)
 
+                      NSLayoutConstraint.activate([
+                          imageView.bottomAnchor.constraint(equalTo: subview.bottomAnchor, constant: -15),
+                          imageView.trailingAnchor.constraint(equalTo: subview.trailingAnchor, constant: -view.directionalLayoutMargins.trailing),
+                          imageView.widthAnchor.constraint(equalToConstant: 36),
+                          imageView.heightAnchor.constraint(equalToConstant: 36)
+                      ])
+                  }
+              }
+          }
     }
 }
 
